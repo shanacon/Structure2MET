@@ -76,7 +76,6 @@ def defaultList(InList, phase) :
         InList.append('$ 	(kgf/cm^2)	(kgf/cm^2)		(cm^2)		(cm)	(cm)\n\n')
         InList.append('$ End Kawashima constitutive law\n\n')
         InList.append('$ Mander constitutive law\n')
-        InList.append('$ Mander constitutive law\n')
         InList.append('$\tName\tFc\tFsy\tAv\tN2\tN3\n')
         InList.append('$\t\t(kgf/cm^2)\t(kgf/cm^2)\t(cm^2)\n')
     if phase ==  1 :

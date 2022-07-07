@@ -1,7 +1,13 @@
 import os
 from _main import *
 from LogSystem import *
-
+import time
+##
+def myexcepthook(type, value, traceback, oldhook=sys.excepthook):
+    oldhook(type, value, traceback)
+    input("Press RETURN. ")
+sys.excepthook = myexcepthook
+##
 cwd = os.getcwd()
 filename = cwd.split('\\')[-1]
 OutputDataX = []
@@ -10,6 +16,7 @@ OutputDataY = []
 defaultList(OutputDataY, 0)
 ##
 # load CNK1
+print('reading data from CNK1...')
 CNK1 = ReadFile('CNK1.INP', os.path.basename(__file__))
 # get Fnum and construct FList
 FNum = int(CNK1.readline().split()[0])
@@ -18,10 +25,14 @@ FOname = []
 for i in range(FNum) :
     tmp = CNK1.readline().split()[0]
     FOname.append(tmp)
-    if tmp[-1] == 'L' :
-        tmp = tmp[:-2]
-    else :
-        tmp = tmp[:-1]
+    try :
+        if tmp[-1] == 'L' :
+            tmp = tmp[:-2]
+        else :
+            tmp = tmp[:-1]
+    except Exception as e:
+        WriteEx()
+        ExceptionExit('FloorName Out of range in CNK1')
     FList.append(tmp)
 # load useless data
 KeepRead  = True
@@ -38,8 +49,12 @@ FCdic = {}
 Fcdata = CNK1.readline().split(',')
 count = 0
 for item in Fcdata :
-    Fc = float(item.split('M')[0])
-    Fn = int(item.split('M')[1])
+    try:
+        Fc = float(item.split('M')[0])
+        Fn = int(item.split('M')[1])
+    except Exception as e:
+        WriteEx()
+        ExceptionExit('Fc read error in CNK1')
     for i in range(Fn) :
         FCdic[FList[count]] = Fc
         count = count + 1
@@ -48,13 +63,18 @@ Fsydic = {}
 Fsydata = CNK1.readline().split(',')
 count = 0
 for item in Fsydata :
-    Fsy = float(item.split('M')[0])
-    Fn = int(item.split('M')[1])
+    try :
+        Fsy = float(item.split('M')[0])
+        Fn = int(item.split('M')[1])
+    except Exception as e:
+        WriteEx()
+        ExceptionExit('Fsy read error in CNK1')
     for i in range(Fn) :
         Fsydic[FList[count]] = Fsy
         count = count + 1
 
 # load CXX
+print('reading data from CXX...')
 CXX = ReadFile('CXX.DAT', os.path.basename(__file__))
 ## get Floor and Cross section
 CandF = CXX.readline().split()
@@ -131,20 +151,21 @@ while CaseCXX < LineLen:
     whichFloor = floor
     ALLCOLUMN.append(COLUMN(name, BC, HC, No1, No, Numx, Numy, FCdic[whichFloor], Fsydic[whichFloor], whichFloor))
     CaseCXX = CaseCXX + 6
-    ## progress bar
-    # if float(CaseCXX / LineLen) * 10.0 > Progress:
-    #     Progress = Progress + 1
-    #     print("\r", end = '')
-    #     print('[', end = '')
-    #     for i in range(Progress):
-    #         print('|', end = '')
-    #     for i in range(10 - Progress):
-    #         print(' ', end = '')
-    #     print(']', end = '')
-    #     time.sleep(0.05)
-    ## progress bar
+    # progress bar
+    if float(CaseCXX / LineLen) * 10.0 > Progress:
+        Progress = Progress + 1
+        print("\r", end = '')
+        print('[', end = '')
+        for i in range(Progress):
+            print('|', end = '')
+        for i in range(10 - Progress):
+            print(' ', end = '')
+        print(']', end = '')
+        time.sleep(0.05)
+    # progress bar
 
 #load beam data
+print('\nreading data from A6B103C...')
 Beam = ReadFile('A6B103C.dat', os.path.basename(__file__))
 #load useless data
 KeepRead  = True
@@ -203,48 +224,116 @@ while CaseBeam < LineLen:
         tmp[i] = tmp[i].replace('x', ' ')
         tmp[i] = tmp[i].replace('/', ' ')
         data = tmp[i].split()
-        nameList.append(data[0] + data[1])
-        if data[0][-1] >= '0' and data[0][-1] <= '9' or data[0][-1] == 'F' or data[0][-1] == 'R':
-            floor = data[0]
-        else :
-            floor = data[0][:-1]
-        WFList.append(floor)
-        BCList.append(data[2])
-        HCList.append(data[3])
-        if tmp6[STIRcount].split('#')[0] == '' :
-            SNumList.append(1)
-        else :
-            SNumList.append(int(tmp6[STIRcount].split('#')[0]))
-        SNoList.append('#' + tmp6[STIRcount].split('#')[-1])
+        try :
+            nameList.append(data[0] + data[1])
+            if data[0][-1] >= '0' and data[0][-1] <= '9' or data[0][-1] == 'F' or data[0][-1] == 'R':
+                floor = data[0]
+            else :
+                floor = data[0][:-1]
+            WFList.append(floor)
+            BCList.append(data[2])
+            HCList.append(data[3])
+            if tmp6[STIRcount].split('#')[0] == '' :
+                SNumList.append(1)
+            else :
+                SNumList.append(int(tmp6[STIRcount].split('#')[0]))
+            SNoList.append('#' + tmp6[STIRcount].split('#')[-1])
+        except Exception as e:
+            WriteEx()
+            ExceptionExit('BEAMData Out of range.')
         STIRcount = STIRcount + 4
     for i in range(Casenum) :
         if nameList[i].find('P') == -1 and (BCList[i] != '0' or HCList[i] != '0'):
             ALLBEAM.append(BEAM(nameList[i], float(BCList[i]), float(HCList[i]), SNoList[i], SNumList[i], FCdic[WFList[i]], Fsydic[WFList[i]], WFList[i]))
     CaseBeam = CaseBeam + 8
+    # progress bar
+    if float(CaseBeam / LineLen) * 10.0 > Progress:
+        Progress = Progress + 1
+        print("\r", end = '')
+        print('[', end = '')
+        for i in range(Progress):
+            print('|', end = '')
+        for i in range(10 - Progress):
+            print(' ', end = '')
+        print(']', end = '')
+        time.sleep(0.05)
+    # progress bar
 ##
 ALLCOLUMN.sort(key=compare)
 ALLBEAM.sort(key=compare)
+print('\ngenerating column data...')
+LineLen = len(ALLCOLUMN)
+Progress = 0
+CaseC = 0
 for column in ALLCOLUMN :
     OutputDataX.append(f'\t{column.name}\t{column.Fc}\t{column.Fsy}\t{column.AVx}\t{column.Numx}\t{column.Numy}\n')
     OutputDataY.append(f'\t{column.name}\t{column.Fc}\t{column.Fsy}\t{column.AVy}\t{column.Numy}\t{column.Numx}\n')
+    CaseC = CaseC + 1
+    # progress bar
+    if float(CaseC / LineLen) * 10.0 > Progress:
+        Progress = Progress + 1
+        print("\r", end = '')
+        print('[', end = '')
+        for i in range(Progress):
+            print('|', end = '')
+        for i in range(10 - Progress):
+            print(' ', end = '')
+        print(']', end = '')
+        time.sleep(0.05)
+    # progress bar
+print('\ngenerating beam data...')
+LineLen = len(ALLBEAM)
+Progress = 0
+CaseC = 0
 for beam in ALLBEAM :  
     OutputDataX.append(f'\t{beam.name}\t{beam.Fc}\t{beam.Fsy}\t{beam.Av}\t{beam.N}\t{beam.N}\n')
     OutputDataY.append(f'\t{beam.name}\t{beam.Fc}\t{beam.Fsy}\t{beam.Av}\t{beam.N}\t{beam.N}\n')
+    CaseC = CaseC + 1
+    # progress bar
+    if float(CaseC / LineLen) * 10.0 > Progress:
+        Progress = Progress + 1
+        print("\r", end = '')
+        print('[', end = '')
+        for i in range(Progress):
+            print('|', end = '')
+        for i in range(10 - Progress):
+            print(' ', end = '')
+        print(']', end = '')
+        time.sleep(0.05)
+    # progress bar
 ##
 defaultList(OutputDataX, 1)
 defaultList(OutputDataY, 1)
 ##
+print('\ngenerating data in second part...')
+LineLen = len(FList)
+Progress = 0
 count = 0
 for item in FList :
     OutputDataX.append(f'\t{FOname[count]}_CONC_fy\t\t{str(Fsydic[item])}\t\t2040000.00\n')
     OutputDataY.append(f'\t{FOname[count]}_CONC_fy\t\t{str(Fsydic[item])}\t\t2040000.00\n')
     count = count + 1
+    # progress bar
+    if float(count / LineLen) * 10.0 > Progress:
+        Progress = Progress + 1
+        print("\r", end = '')
+        print('[', end = '')
+        for i in range(Progress):
+            print('|', end = '')
+        for i in range(10 - Progress):
+            print(' ', end = '')
+        print(']', end = '')
+        time.sleep(0.05)
+    # progress bar
 defaultList(OutputDataX, 2)
 defaultList(OutputDataY, 2)
-
-outputX = open(filename + '+X.MET', mode = 'w')
-for line in OutputDataX :
-    outputX.write(line)
-outputY = open(filename + '+Y.MET', mode = 'w')
-for line in OutputDataY :
-    outputY.write(line)
+##
+print('\noutput data...')
+with open(filename + '+X.MET', 'w') as outputX:
+    for line in OutputDataX :
+        outputX.write(line)
+with open(filename + '+Y.MET', 'w') as outputY:
+    for line in OutputDataY :
+        outputY.write(line)
+print('\nComplete!!')
+os.system('pause')
