@@ -84,3 +84,5 @@ def defaultList(InList, phase) :
         InList.append('$ Steel stress strain\n')
         InList.append('$\tName\t\tYieldingStress\t\tEs\n')
         InList.append('$\t\t\t(kgf/cm^2)\t\t(kgf/cm^2)\n')
+    if phase ==  2 :
+        InList.append('\nEnd steel stress strain\n')

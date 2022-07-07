@@ -14,8 +14,10 @@ CNK1 = ReadFile('CNK1.INP', os.path.basename(__file__))
 # get Fnum and construct FList
 FNum = int(CNK1.readline().split()[0])
 FList = []
+FOname = []
 for i in range(FNum) :
     tmp = CNK1.readline().split()[0]
+    FOname.append(tmp)
     if tmp[-1] == 'L' :
         tmp = tmp[:-2]
     else :
@@ -231,6 +233,15 @@ for beam in ALLBEAM :
 ##
 defaultList(OutputDataX, 1)
 defaultList(OutputDataY, 1)
+##
+count = 0
+for item in FList :
+    OutputDataX.append(f'\t{FOname[count]}_CONC_fy\t\t{str(Fsydic[item])}\t\t2040000.00\n')
+    OutputDataY.append(f'\t{FOname[count]}_CONC_fy\t\t{str(Fsydic[item])}\t\t2040000.00\n')
+    count = count + 1
+defaultList(OutputDataX, 2)
+defaultList(OutputDataY, 2)
+
 outputX = open(filename + '+X.MET', mode = 'w')
 for line in OutputDataX :
     outputX.write(line)
