@@ -141,11 +141,96 @@ while CaseCXX < LineLen:
     #     print(']', end = '')
     #     time.sleep(0.05)
     ## progress bar
+
+#load beam data
+Beam = ReadFile('A6B103C.dat', os.path.basename(__file__))
+#load useless data
+KeepRead  = True
+while KeepRead:
+    line = Beam.readline()
+    if line.find('BEAM') != -1:
+        KeepRead = False
+KeepRead  = True
+while KeepRead:
+    line = Beam.readline()
+    if line != '\n':
+        KeepRead = False
+ALLBEAM = []
+BEAM_Data = [line]
+for line in Beam.readlines():
+    if line != '\n' and line.find('BEAM') == -1:
+        BEAM_Data.append(line)
+LineLen = len(BEAM_Data)
+Progress = 0
+CaseBeam = 0
+while CaseBeam < LineLen:
+    ## set lines
+    lines = []
+    try :
+        lines.append(BEAM_Data[CaseBeam])
+        lines.append(BEAM_Data[CaseBeam + 1])
+        lines.append(BEAM_Data[CaseBeam + 2])
+        lines.append(BEAM_Data[CaseBeam + 3])
+        lines.append(BEAM_Data[CaseBeam + 4])
+        lines.append(BEAM_Data[CaseBeam + 5])
+        lines.append(BEAM_Data[CaseBeam + 6])
+        lines.append(BEAM_Data[CaseBeam + 7])
+    except Exception as e:
+        WriteEx()
+        ExceptionExit('BEAMData Out of range.')
+    ## get case num of these line
+    Casenum = lines[0].count('*') - 1
+    ## get name and BC, HC
+    nameList = []
+    BCList = []
+    HCList = []
+    SNoList = []
+    SNumList = []
+    WFList = []
+    #
+    tmp = lines[0].split('*')
+    tmp2 = lines[2].replace('*', ' ').split()
+    tmp3 = lines[3].replace('#', ' ').split()
+    tmp4 = lines[4].replace('#', ' ').split()
+    tmp5 = lines[5].replace('*', ' ').split()
+    tmp6 = lines[6].split()
+    STIRcount = 2
+    for i in range(1, 1 + Casenum) :
+        tmp[i] = tmp[i].replace('(', ' ')
+        tmp[i] = tmp[i].replace(')', ' ')
+        tmp[i] = tmp[i].replace('x', ' ')
+        tmp[i] = tmp[i].replace('/', ' ')
+        data = tmp[i].split()
+        nameList.append(data[0] + data[1])
+        if data[0][-1] >= '0' and data[0][-1] <= '9' or data[0][-1] == 'F' or data[0][-1] == 'R':
+            floor = data[0]
+        else :
+            floor = data[0][:-1]
+        WFList.append(floor)
+        BCList.append(data[2])
+        HCList.append(data[3])
+        if tmp6[STIRcount].split('#')[0] == '' :
+            SNumList.append(1)
+        else :
+            SNumList.append(int(tmp6[STIRcount].split('#')[0]))
+        SNoList.append('#' + tmp6[STIRcount].split('#')[-1])
+        STIRcount = STIRcount + 4
+    for i in range(Casenum) :
+        if nameList[i].find('P') == -1 and (BCList[i] != '0' or HCList[i] != '0'):
+            ALLBEAM.append(BEAM(nameList[i], float(BCList[i]), float(HCList[i]), SNoList[i], SNumList[i], FCdic[WFList[i]], Fsydic[WFList[i]], WFList[i]))
+    CaseBeam = CaseBeam + 8
+##
 ALLCOLUMN.sort(key=compare)
+ALLBEAM.sort(key=compare)
 for column in ALLCOLUMN :
     OutputDataX.append(f'\t{column.name}\t{column.Fc}\t{column.Fsy}\t{column.AVx}\t{column.Numx}\t{column.Numy}\n')
     OutputDataY.append(f'\t{column.name}\t{column.Fc}\t{column.Fsy}\t{column.AVy}\t{column.Numy}\t{column.Numx}\n')
-
+for beam in ALLBEAM :  
+    OutputDataX.append(f'\t{beam.name}\t{beam.Fc}\t{beam.Fsy}\t{beam.Av}\t{beam.N}\t{beam.N}\n')
+    OutputDataY.append(f'\t{beam.name}\t{beam.Fc}\t{beam.Fsy}\t{beam.Av}\t{beam.N}\t{beam.N}\n')
+##
+defaultList(OutputDataX, 1)
+defaultList(OutputDataY, 1)
 outputX = open(filename + '+X.MET', mode = 'w')
 for line in OutputDataX :
     outputX.write(line)

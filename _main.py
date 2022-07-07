@@ -21,7 +21,7 @@ class COLUMN :
         self.AVx = "{:.2f}".format(float(Numx * NosDic[int(No[1:])]))
         self.AVy = "{:.2f}".format(float(Numy * NosDic[int(No[1:])]))
 class BEAM :
-    def __init__(self, name, BC, HC, No, UNo, DNo, S, SM, whichFloor):
+    def __init__(self, name, BC, HC, No, Nonum, Fc, Fsy, whichFloor):
         self.name = name
         self.RCMaterial = name + '_CONC'
         if whichFloor[0] == 'R':
@@ -40,11 +40,11 @@ class BEAM :
         self.type = type  
         self.BC = BC  
         self.HC = HC  
-        self.No = No  
-        self.UNo = UNo  
-        self.DNo = DNo 
-        self.S = S
-        self.SM = SM
+        self.No = No
+        self.N = "{:.2f}".format(Nonum * 2.0)
+        self.Fc = Fc
+        self.Fsy = Fsy
+        self.Av = "{:.2f}".format(float(NosDic[int(No[1:])] * Nonum * 2.0))
         self.whichFloor = whichFloor
 def IsInt(s):
     try: 
@@ -79,3 +79,8 @@ def defaultList(InList, phase) :
         InList.append('$ Mander constitutive law\n')
         InList.append('$\tName\tFc\tFsy\tAv\tN2\tN3\n')
         InList.append('$\t\t(kgf/cm^2)\t(kgf/cm^2)\t(cm^2)\n')
+    if phase ==  1 :
+        InList.append('\n$ End Mander constitutive law\n\n')
+        InList.append('$ Steel stress strain\n')
+        InList.append('$\tName\t\tYieldingStress\t\tEs\n')
+        InList.append('$\t\t\t(kgf/cm^2)\t\t(kgf/cm^2)\n')
