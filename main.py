@@ -149,7 +149,8 @@ while CaseCXX < LineLen:
         WriteEx()
         ExceptionExit('CXX: line 4 or 5 Out of range. Doing No Numxy S.')
     whichFloor = floor
-    ALLCOLUMN.append(COLUMN(name, BC, HC, No1, No, Numx, Numy, FCdic[whichFloor], Fsydic[whichFloor], whichFloor))
+    if whichFloor[0] >= '0' and whichFloor[0] <= '9' or whichFloor == 'R1':
+        ALLCOLUMN.append(COLUMN(name, BC, HC, No1, No, Numx, Numy, FCdic[whichFloor], Fsydic[whichFloor], whichFloor))
     CaseCXX = CaseCXX + 6
     # progress bar
     if float(CaseCXX / LineLen) * 10.0 > Progress:
@@ -161,7 +162,7 @@ while CaseCXX < LineLen:
         for i in range(10 - Progress):
             print(' ', end = '')
         print(']', end = '')
-        time.sleep(0.05)
+        time.sleep(0.02)
     # progress bar
 
 #load beam data
@@ -244,7 +245,8 @@ while CaseBeam < LineLen:
         STIRcount = STIRcount + 4
     for i in range(Casenum) :
         if nameList[i].find('P') == -1 and (BCList[i] != '0' or HCList[i] != '0'):
-            ALLBEAM.append(BEAM(nameList[i], float(BCList[i]), float(HCList[i]), SNoList[i], SNumList[i], FCdic[WFList[i]], Fsydic[WFList[i]], WFList[i]))
+            if WFList[i][0] >= '0' and WFList[i][0] <= '9' or WFList[i] == 'R1':
+                ALLBEAM.append(BEAM(nameList[i], float(BCList[i]), float(HCList[i]), SNoList[i], SNumList[i], FCdic[WFList[i]], Fsydic[WFList[i]], WFList[i]))
     CaseBeam = CaseBeam + 8
     # progress bar
     if float(CaseBeam / LineLen) * 10.0 > Progress:
@@ -256,7 +258,7 @@ while CaseBeam < LineLen:
         for i in range(10 - Progress):
             print(' ', end = '')
         print(']', end = '')
-        time.sleep(0.05)
+        time.sleep(0.02)
     # progress bar
 ##
 ALLCOLUMN.sort(key=compare)
@@ -279,7 +281,7 @@ for column in ALLCOLUMN :
         for i in range(10 - Progress):
             print(' ', end = '')
         print(']', end = '')
-        time.sleep(0.05)
+        time.sleep(0.02)
     # progress bar
 print('\ngenerating beam data...')
 LineLen = len(ALLBEAM)
@@ -299,7 +301,7 @@ for beam in ALLBEAM :
         for i in range(10 - Progress):
             print(' ', end = '')
         print(']', end = '')
-        time.sleep(0.05)
+        time.sleep(0.02)
     # progress bar
 ##
 defaultList(OutputDataX, 1)
@@ -310,8 +312,9 @@ LineLen = len(FList)
 Progress = 0
 count = 0
 for item in FList :
-    OutputDataX.append(f'\t{FOname[count]}_CONC_fy\t\t{str(Fsydic[item])}\t\t2040000.00\n')
-    OutputDataY.append(f'\t{FOname[count]}_CONC_fy\t\t{str(Fsydic[item])}\t\t2040000.00\n')
+    if FOname[count][0] >= '0' and FOname[count][0] <= '9' or FOname[count] == 'R1F':
+        OutputDataX.append(f'\t{FOname[count]}_CONC_fy\t\t{str(Fsydic[item])}\t\t2040000.00\n')
+        OutputDataY.append(f'\t{FOname[count]}_CONC_fy\t\t{str(Fsydic[item])}\t\t2040000.00\n')
     count = count + 1
     # progress bar
     if float(count / LineLen) * 10.0 > Progress:
@@ -323,7 +326,7 @@ for item in FList :
         for i in range(10 - Progress):
             print(' ', end = '')
         print(']', end = '')
-        time.sleep(0.05)
+        time.sleep(0.02)
     # progress bar
 defaultList(OutputDataX, 2)
 defaultList(OutputDataY, 2)
